@@ -1,7 +1,17 @@
 #ifndef PID_H
 #define PID_H
 
+#include <random>
+#include <numeric>
+#include <math.h>
+#include <float.h>
+
 class PID {
+private:
+	bool p_enabled;
+	bool i_enabled;
+	bool d_enabled;
+
 public:
   /*
   * Errors
@@ -17,10 +27,16 @@ public:
   double Ki;
   double Kd;
 
+	double output;
+	
+	int epoch;
+	double alpha;
+	double epsilon;
+
   /*
   * Constructor
   */
-  PID();
+  PID(bool p_enable = true, bool i_enable = true, bool d_enable = true);
 
   /*
   * Destructor.
@@ -33,9 +49,14 @@ public:
   void Init(double Kp, double Ki, double Kd);
 
   /*
-  * Update the PID error variables given cross track error.
+  * Update the PID error variables given an error signal.
   */
-  void UpdateError(double cte);
+  void Update(double error);
+
+	/*
+	* Computes the output of the PID controller
+	*/
+	double Compute();
 
   /*
   * Calculate the total PID error.
