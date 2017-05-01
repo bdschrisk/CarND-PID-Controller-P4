@@ -25,7 +25,7 @@ Below are comparisons between the weight initialisation stategies for the STUPID
 ![STUPID Optimisation using symmetric vs. standard PID controllers](/images/SGD-PID-1.png)
 *Symmetric initialisation of 0.1*
 
-![STUPID Optimisation weight strategy vs. standard PID controllers](/images/SGD-PID-1.png)
+![STUPID Optimisation weight strategy vs. standard PID controllers](/images/SGD-PID-2.png)
 *Non-symmetric initialisation using above strategy*
 
 ## Dependencies
