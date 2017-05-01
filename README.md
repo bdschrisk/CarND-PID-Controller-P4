@@ -11,6 +11,7 @@ To initialise the starting weights [Wp, Wi, Wd], a uniform distribution with par
  - Wp = 0.4 < x < 0.7
  - Wi = 0.0 < x < 0.4
  - Wd = 0.7 < x < 5.0
+
 *The above initialisation strategy ensures that the integral doesn't cause the gradients to explode or saturate the other gain values.*
 
 The update process is robust enough that symmetry breaking during initialisation is not required, however, it will cause delayed convergence.  Tuning the convergence speed is done by modifying the learning rate (alpha).
@@ -23,9 +24,11 @@ It is also complete in that additional process noise induced during operation wi
 Below are comparisons between the weight initialisation stategies for the STUPID controller in reference to traditional PID controllers.
 
 ![STUPID Optimisation using symmetric vs. standard PID controllers](/images/SGD-PID-1.png)
+
 *Symmetric initialisation of 0.1*
 
 ![STUPID Optimisation weight strategy vs. standard PID controllers](/images/SGD-PID-2.png)
+
 *Non-symmetric initialisation using above strategy*
 
 ## Dependencies
@@ -51,12 +54,3 @@ Below are comparisons between the weight initialisation stategies for the STUPID
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
