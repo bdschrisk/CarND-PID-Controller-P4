@@ -69,12 +69,9 @@ void PID::Update(double error) {
 
 double PID::Compute() {
 
-	if (this->p_enabled)
-		this->output -= -this->Kp * this->p_error; // Proportional gain
-	if (this->i_enabled)
-		this->output -= this->Ki * this->i_error; // Integral gain
-	if (this->d_enabled)
-		this->output -= this->Kd * this->d_error; // Differential gain
+	this->output = ((-this->Kp * this->p_error) * this->p_enabled) // Proportional gain
+								- ((this->Kd * this->d_error) * this->d_enabled) // Differential gain
+								- ((this->Ki * this->i_error) * this->i_enabled); // Integral gain
 
 	return this->output;
 }
