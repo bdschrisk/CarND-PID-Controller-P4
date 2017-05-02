@@ -11,6 +11,7 @@ private:
 	bool p_enabled;
 	bool i_enabled;
 	bool d_enabled;
+	bool enabled;
 
 public:
   /*
@@ -52,6 +53,11 @@ public:
   * Update the PID error variables given an error signal.
   */
   void Update(double error);
+
+	/*
+	* Stops learning
+	*/
+	void Stop();
 
 	/*
 	* Computes the output of the PID controller

@@ -19,10 +19,16 @@ PID::PID(bool p_enable, bool i_enable, bool d_enable) {
 
 	this->epoch = -1;
 
-	this->alpha = 1.1;
+	this->alpha = 0.1;
 	this->epsilon = 1e-07;
 
 	this->output = 0.0;
+
+	this->p_error = 0.0;
+	this->i_error = 0.0;
+	this->d_error = 0.0;
+
+	this->enabled = true;
 }
 
 PID::~PID() {}
@@ -31,10 +37,6 @@ void PID::Init(double Kp, double Ki, double Kd) {
 	this->Kp = Kp;
 	this->Ki = Ki;
 	this->Kd = Kd;
-
-	this->p_error = 0.0;
-	this->i_error = 0.0;
-	this->d_error = 0.0;
 }
 
 void PID::Update(double error) {
@@ -55,7 +57,7 @@ void PID::Update(double error) {
 	this->i_error += error;
 	this->d_error = (error - p_tm1);
 
-	if (error > epsilon) {
+	if (fabs(error) > epsilon && this->enabled) {
 			// apply gradient descent
 		double kp_d = (this->Kp * (this->p_error - p_tm1)) * error;
 		double ki_d = (this->Ki * (this->i_error - i_tm1)) * error;
@@ -69,11 +71,16 @@ void PID::Update(double error) {
 
 double PID::Compute() {
 
-	this->output = ((-this->Kp * this->p_error) * this->p_enabled) // Proportional gain
-								- ((this->Kd * this->d_error) * this->d_enabled) // Differential gain
-								- ((this->Ki * this->i_error) * this->i_enabled); // Integral gain
+	this->output = -((this->Kp * this->p_error) * this->p_enabled) // Proportional gain
+								 -((this->Kd * this->d_error) * this->d_enabled) // Differential gain
+								 -((this->Ki * this->i_error) * this->i_enabled); // Integral gain
 
 	return this->output;
+}
+
+void PID::Stop() {
+	// stops learning
+	this->enabled = false;
 }
 
 double PID::TotalError() {

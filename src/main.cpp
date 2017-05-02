@@ -19,6 +19,9 @@ double rad2deg(double x) { return x * 180 / pi(); }
 double clip(double v, double low, double high) { return max(low, min(v, high)); }
 
 const double max_speed = 100.0;
+const double recover_factor = 0.4;
+const double steer_factor = 0.7;
+const double scale_factor = 0.4;
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -43,10 +46,9 @@ int main()
   uWS::Hub h;
 
   PID pid_steering;
-	PID pid_throttle;
-  // TODO: Initialize the pid variable.
+	PID pid_gain;
 
-	h.onMessage([&pid_steering, &pid_throttle](uWS::WebSocket<uWS::SERVER> *ws, char *data, size_t length, uWS::OpCode opCode) {
+	h.onMessage([&pid_steering, &pid_gain](uWS::WebSocket<uWS::SERVER> *ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -61,26 +63,40 @@ int main()
           double cte = stod(j[1]["cte"].get<string>());
           double speed = stod(j[1]["speed"].get<string>());
           double angle = stod(j[1]["steering_angle"].get<string>());
-          
-					double cte_t = (speed - max_speed);
 
-					pid_steering.Update(cte);
-					pid_throttle.Update(cte_t);
-          
+					angle = deg2rad(angle);
+
+					double p_tm1 = pid_gain.p_error;
+
+					pid_gain.Update(cte * steer_factor);
+					double val = pid_gain.Compute();
+					
+					pid_steering.Update(-val * recover_factor);
 					double steer_value = pid_steering.Compute();
-					double throttle_value = pid_throttle.Compute();
 
+					cout << "Regulator: " << steer_value << "  |  Kp: " << pid_steering.Kp << " Ki: " << pid_steering.Ki << " Kd: " << pid_steering.Kd << endl;
+					cout << "Steering: " << val << "  |  Kp: " << pid_gain.Kp << " Ki: " << pid_gain.Ki << " Kd: " << pid_gain.Kd << endl;
+
+					steer_value = (steer_value * recover_factor) + (val * (1.0-recover_factor));
+					steer_value = (steer_value * scale_factor) + (angle * (1.0-scale_factor));
 					steer_value = clip(steer_value, -1.0, 1.0);
-					throttle_value = clip(throttle_value, -1.0, 1.0);
-          
+					
+					// stop learning after 900 epochs
+					if (pid_steering.epoch == 1200) {
+						pid_steering.Stop();
+						pid_gain.Stop();
+						cout << "\nOptimised!\n" << endl;
+					}
+
           // DEBUG
-          cout << "CTE: " << cte << " Steering Value: " << steer_value << endl;
+          cout << "CTE: " << cte << "  Steering: " << steer_value << "  Speed: " << speed << endl;
 
 					json msgJson;
 					msgJson["steering_angle"] = steer_value;
-					msgJson["throttle"] = 0.3;
+					msgJson["throttle"] = 0.48;
+					
 					auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-					std::cout << msg << std::endl;
+					
 					(*ws).send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
