@@ -19,8 +19,9 @@ double rad2deg(double x) { return x * 180 / pi(); }
 double clip(double v, double low, double high) { return max(low, min(v, high)); }
 
 const double max_speed = 100.0;
+// Recovery driving factor (0..1)
 const double recover_factor = 0.4;
-const double steer_factor = 0.7;
+// Smoothing factor (0..1)
 const double scale_factor = 0.4;
 
 // Checks if the SocketIO event has JSON data.
@@ -68,7 +69,7 @@ int main()
 
 					double p_tm1 = pid_gain.p_error;
 
-					pid_gain.Update(cte * steer_factor);
+					pid_gain.Update(cte * (1.0-recover_factor));
 					double val = pid_gain.Compute();
 					
 					pid_steering.Update(-val * recover_factor);
@@ -81,7 +82,7 @@ int main()
 					steer_value = (steer_value * scale_factor) + (angle * (1.0-scale_factor));
 					steer_value = clip(steer_value, -1.0, 1.0);
 					
-					// stop learning after 900 epochs
+					// stop learning after 1200 epochs
 					if (pid_steering.epoch == 1200) {
 						pid_steering.Stop();
 						pid_gain.Stop();
