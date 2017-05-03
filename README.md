@@ -31,6 +31,16 @@ Below are comparisons between the weight initialisation stategies for the STUPID
 
 *Non-symmetric initialisation using above strategy*
 
+## Implementation
+Implementation of the PID controller for driving the vehicle within the @udacity simulator is done by using dual STUPID controllers.  
+The first controller computes the naive steering angle while the second combats the confirmation bias induced in the first.  Its effects are most prominent during turns with noisy measurements, where the regulator prevents the first from steering towards the noisy error.
+
+The outputs of both controllers are scaled and averaged with the angle at the previous timestep.  This allows the model to drive quite stable at speeds of nearly 100km/h with very noisy waypoints.
+
+During runtime, both controllers randomly initialise their gain weights as described by the above strategy.  Optimisation is performed for the first 1200 epochs where both controllers remain static thereafter.
+
+See [Screenshot 1](/images/screenshot-1.png) and [Screenshot 2](/images/screenshot-2.png) to see it in action.
+
 ## Dependencies
 
 * cmake >= 3.5
